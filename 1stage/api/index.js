@@ -13,7 +13,7 @@ const ipinfo = new IPinfoWrapper(process.env.IP_TOKEN);
 app.get("/", (req, res) => {
   res.status(200).send({
     status: "success",
-    message: `Navigate to the route ${req.protocol}://${req.hostname}/api/hello?visitor_name=name to get a greeting from this api`,
+    message: `Navigate to the route https://${req.hostname}/api/hello?visitor_name=name to get a greeting from this api`,
   });
 });
 
