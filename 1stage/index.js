@@ -6,6 +6,8 @@ app = express();
 
 app.use(express.json());
 
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+
 const ipinfo = new IPinfoWrapper(process.env.IP_TOKEN);
 
 app.get("/", (req, res) => {
