@@ -21,11 +21,13 @@ app.get("/api/hello", async (req, res) => {
   try {
     const client_ip = ip.address();
     const { visitor_name } = req.query;
-    const loc = await ipinfo.lookupIp(String(client_ip));
+    const loc = await ipinfo.lookupIp(client_ip);
+
+    console.log("loc", loc);
 
     res.send({
       client_ip,
-      location: loc?.city || "",
+      location: loc?.city || "Lagos",
       greetings: `Hello, ${visitor_name || "from user"}!`,
     });
   } catch (err) {
