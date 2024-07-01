@@ -1,6 +1,8 @@
 const express = require("express");
 const geoip = require("geoip-lite");
 const fetch = require("node-fetch");
+// const { IPinfoWrapper } = require("node-ipinfo");
+const IPData = require("ipdata").default;
 require("dotenv").config();
 
 app = express();
@@ -8,6 +10,11 @@ app = express();
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+
+const cacheConfig = {
+  max: 1000, // max size
+  maxAge: 10 * 60 * 1000, // max age in ms (i.e. 10 minutes)
+};
 
 async function getWeatherData(city) {
   const weatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&APPID=${process.env.WEATHER_API_KEY}`;
@@ -38,9 +45,11 @@ app.get("/api/hello", async (req, res) => {
 
     const { visitor_name } = req.query;
 
-    const geo = geoip.lookup(client_ip);
+    const ipdata = new IPData(process.env.IPDATA_API_KEY, cacheConfig);
+    const fields = ["city"];
+    const location = await ipdata?.lookup(client_ip, null, fields);
 
-    const city = geo?.city;
+    const city = location?.city;
 
     const weather = await getWeatherData(city);
 
