@@ -1,19 +1,26 @@
 const express = require("express");
 const geoip = require("geoip-lite");
 const getWeatherData = require("../getweather");
+const fetch = require("node-fetch");
 require("dotenv").config();
-
-// import express from "express";
-// import geoip from "geoip-lite";
-// import getWeatherData from "../getweather";
-// import dotevn from "dotenv";
-// dotevn.config();
 
 app = express();
 
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+
+async function getWeatherData(city, apiKey) {
+  const weatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&APPID=${apiKey}`;
+  try {
+    const response = await fetch(weatherURL);
+    const weatherData = await response.json();
+    return weatherData;
+  } catch (error) {
+    console.log("Error fetching weather data:", error);
+    throw error;
+  }
+}
 
 app.get("/", (req, res) => {
   res.status(200).send({
