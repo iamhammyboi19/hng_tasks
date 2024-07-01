@@ -38,7 +38,7 @@ app.get("/api/hello", async (req, res) => {
 
     const { visitor_name } = req.query;
 
-    var geo = geoip.lookup(client_ip);
+    const geo = geoip.lookup(client_ip);
 
     const city = geo?.city;
 
