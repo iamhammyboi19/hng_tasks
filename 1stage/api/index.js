@@ -1,6 +1,5 @@
 const express = require("express");
 const geoip = require("geoip-lite");
-const getWeatherData = require("../getweather");
 const fetch = require("node-fetch");
 require("dotenv").config();
 
@@ -10,8 +9,8 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
-async function getWeatherData(city, apiKey) {
-  const weatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&APPID=${apiKey}`;
+async function getWeatherData(city) {
+  const weatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&APPID=${process.env.WEATHER_API_KEY}`;
   try {
     const response = await fetch(weatherURL);
     const weatherData = await response.json();
@@ -31,19 +30,19 @@ app.get("/", (req, res) => {
 
 app.get("/api/hello", async (req, res) => {
   try {
-    // const client_ip = ip.address();
     const client_ip =
       req.headers["cf-connecting-ip"] ||
       req.headers["x-real-ip"] ||
       req.headers["x-forwarded-for"] ||
       req.socket.remoteAddress;
+
     const { visitor_name } = req.query;
 
     var geo = geoip.lookup(client_ip);
 
     const city = geo?.city;
 
-    const weather = await getWeatherData(city, process.env.WEATHER_API_KEY);
+    const weather = await getWeatherData(city);
 
     const temp = weather?.main?.temp;
 
