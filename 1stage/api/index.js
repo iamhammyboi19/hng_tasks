@@ -1,7 +1,5 @@
 const express = require("express");
-const geoip = require("geoip-lite");
 const fetch = require("node-fetch");
-// const { IPinfoWrapper } = require("node-ipinfo");
 const IPData = require("ipdata").default;
 require("dotenv").config();
 
