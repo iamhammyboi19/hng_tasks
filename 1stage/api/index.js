@@ -1,6 +1,5 @@
 const express = require("express");
 const fetch = require("node-fetch");
-const IPData = require("ipdata").default;
 require("dotenv").config();
 
 app = express();
@@ -8,11 +7,6 @@ app = express();
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
-
-const cacheConfig = {
-  max: 1000, // max size
-  maxAge: 10 * 60 * 1000, // max age in ms (i.e. 10 minutes)
-};
 
 async function getWeatherData(city) {
   const weatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&APPID=${process.env.WEATHER_API_KEY}`;
@@ -23,6 +17,17 @@ async function getWeatherData(city) {
   } catch (error) {
     console.log("Error fetching weather data:", error);
     throw error;
+  }
+}
+
+async function getCity(ip) {
+  try {
+    const url = `https://ipinfo.io/${ip}?token=${process.env.IPINFO_API_TOKEN}`;
+    const response = await fetch(url);
+    const location = await response.json();
+    return location;
+  } catch (err) {
+    throw err;
   }
 }
 
@@ -42,10 +47,9 @@ app.get("/api/hello", async (req, res) => {
       req.socket.remoteAddress;
 
     const { visitor_name } = req.query;
+    const location = await getCity(client_ip);
 
-    const ipdata = new IPData(process.env.IPDATA_API_KEY, cacheConfig);
-    const fields = ["city"];
-    const location = await ipdata?.lookup(client_ip, null, fields);
+    console.log("location", location);
 
     const city = location?.city;
 
