@@ -31,12 +31,12 @@ exports.signupUser = async (req, res, next) => {
       );
     }
 
-    // const existing_user = await User.findOne({ where: { email } });
-    // if (existing_user) {
-    //   return next(
-    //     new CustomError("User with this email address already exists", 400)
-    //   );
-    // }
+    const existing_user = await User.findOne({ where: { email } });
+    if (existing_user) {
+      return next(
+        new CustomError("User with this email address already exists", 400)
+      );
+    }
 
     const encrypted_pass = await bcrypt.hash(password, 12);
     await sequelize.sync({});
@@ -154,8 +154,6 @@ exports.protectedUser = async (req, res, next) => {
       user_token,
       process.env.JWT_SECRET
     );
-
-    console.log("user_verified", user_verified.message);
 
     // find user with the id generated from verified token
     const user = await User.findOne({ where: { user_id: user_verified.id } });
