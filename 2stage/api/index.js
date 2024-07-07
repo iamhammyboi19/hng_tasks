@@ -11,14 +11,18 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("Database connected successfully");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+// sequelize
+//   .authenticate()
+//   .then(() => {
+//     console.log("Database connected successfully");
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });
+
+app.get("/", (req, res) => {
+  res.send({ status: "success", message: "Welcome to this postgres ORM db" });
+});
 
 app.use("/auth", authRoute);
 app.use("/api", userRoute);
@@ -56,3 +60,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Listening on port ", PORT);
 });
+
+module.exports = app;

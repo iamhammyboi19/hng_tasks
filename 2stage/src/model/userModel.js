@@ -8,16 +8,17 @@ const phone = require("phone");
 const User = sequelize.define(
   "user",
   {
-    userId: {
+    user_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     firstName: {
       type: DataTypes.STRING,
+      allowNull: false,
       validate: {
         isNotEmpty(value) {
-          if (value === "") {
+          if (value === "" || value === null) {
             throw new CustomError("First name is a required field", 422);
           }
         },
@@ -26,9 +27,10 @@ const User = sequelize.define(
     },
     lastName: {
       type: DataTypes.STRING,
+      // allowNull: false,
       validate: {
         isNotEmpty(value) {
-          if (value === "") {
+          if (value === "" || value === null) {
             throw new CustomError("Last name is a required field", 422);
           }
         },
@@ -65,14 +67,6 @@ const User = sequelize.define(
     phone: {
       type: DataTypes.STRING,
       allowNull: true,
-      //   validate: {
-      //     isNotPhone(value) {
-      //       const isPhone = phone(value);
-      //       if (!isPhone.isValid) {
-      //         throw new CustomError(`${value} is not a valid phone number`, 422);
-      //       }
-      //     },
-      //   },
       trim: true,
     },
   },
@@ -82,7 +76,7 @@ const User = sequelize.define(
 const Organisation = sequelize.define(
   "organisation",
   {
-    orgId: {
+    org_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
@@ -112,31 +106,14 @@ const Organisation = sequelize.define(
   { freezeTableName: true }
 );
 
-// const User_and_Organisations = sequelize.define(
-//   "user_and_organisation",
-//   {
-//     userId: {
-//       type: DataTypes.INTEGER,
-//       allowNull: true,
-//     },
-//     guest: {
-//       type: DataTypes.INTEGER,
-//       allowNull: true,
-//     },
-//   },
-
-//   { freezeTableName: true }
-// );
-
 User.belongsToMany(Organisation, {
   through: "User_and_Organisations",
   foreignKey: "creator_id",
 });
 Organisation.belongsToMany(User, {
   through: "User_and_Organisations",
-  foreignKey: "orgId",
+  foreignKey: "org_id",
 });
 
 exports.User = User;
 exports.Organisation = Organisation;
-// exports.User_and_Organisations = User_and_Organisations;

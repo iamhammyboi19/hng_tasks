@@ -21,6 +21,23 @@ exports.signupUser = async (req, res, next) => {
     // create user
     const { firstName, lastName, email, password, phone, description } =
       req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+      return next(
+        new CustomError(
+          "firstName, lastName, email, password is required field",
+          422
+        )
+      );
+    }
+
+    // const existing_user = await User.findOne({ where: { email } });
+    // if (existing_user) {
+    //   return next(
+    //     new CustomError("User with this email address already exists", 400)
+    //   );
+    // }
+
     const encrypted_pass = await bcrypt.hash(password, 12);
     await sequelize.sync({});
     const user = await User.create({
@@ -37,7 +54,7 @@ exports.signupUser = async (req, res, next) => {
         const name = `${user?.firstName}'s Organisation`;
         await sequelize.sync({});
         const organisation = await Organisation.create({
-          org_owner_id: user.userId,
+          org_owner_id: user.user_id,
           name,
           description,
         });
@@ -48,7 +65,7 @@ exports.signupUser = async (req, res, next) => {
       }
     }
 
-    const accessToken = await createToken(user.userId);
+    const accessToken = await createToken(user.user_id);
 
     res.status(201).json({
       status: "success",
@@ -75,6 +92,13 @@ exports.loginUser = async (req, res, next) => {
   try {
     //
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return next(
+        new CustomError("Please provide your email and password", 401)
+      );
+    }
+
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({
@@ -91,7 +115,7 @@ exports.loginUser = async (req, res, next) => {
       });
     }
 
-    const accessToken = await createToken(user.userId);
+    const accessToken = await createToken(user.user_id);
     res.status(200).json({
       status: "success",
       message: "Login in successful",
@@ -131,8 +155,10 @@ exports.protectedUser = async (req, res, next) => {
       process.env.JWT_SECRET
     );
 
+    console.log("user_verified", user_verified.message);
+
     // find user with the id generated from verified token
-    const user = await User.findOne({ where: { userId: user_verified.id } });
+    const user = await User.findOne({ where: { user_id: user_verified.id } });
     if (!user) {
       return next(
         new CustomError(`There is no user found with this token`, 404)
@@ -149,14 +175,14 @@ exports.protectedUser = async (req, res, next) => {
 exports.getSpecificUser = async (req, res, next) => {
   try {
     //
-    const { userId } = req.currentUser;
+    const { user_id } = req.currentUser;
     const { id } = req.params;
 
-    if (String(userId) !== String(id)) {
+    if (String(user_id) !== String(id)) {
       return next(new CustomError("You cannot get another user's record", 400));
     }
 
-    const user = await User.findOne({ where: { userId: id } });
+    const user = await User.findOne({ where: { user_id: id } });
 
     if (!user) {
       return next(new CustomError("There is no user with this id", 404));
@@ -166,7 +192,7 @@ exports.getSpecificUser = async (req, res, next) => {
       status: "success",
       message: "User successfully retrived",
       data: {
-        userId: user.userId,
+        user_id: user.user_id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
@@ -180,11 +206,11 @@ exports.getSpecificUser = async (req, res, next) => {
 
 exports.getSpecificUserOrganisations = async (req, res, next) => {
   try {
-    const { userId } = req.currentUser;
+    const { user_id } = req.currentUser;
     const ownOrgs = await Organisation.findAll({
-      where: { org_owner_id: userId },
+      where: { org_owner_id: user_id },
     });
-    const curUser = await User.findOne({ where: { userId } });
+    const curUser = await User.findOne({ where: { user_id } });
     const org = await curUser.getOrganisations();
     res.status(200).json({
       status: "success",
@@ -199,9 +225,9 @@ exports.getSpecificUserOrganisations = async (req, res, next) => {
 
 exports.getSpecificOrganisation = async (req, res, next) => {
   try {
-    const { orgId } = req.params;
+    const { org_id } = req.params;
     const org = await Organisation.findOne({
-      where: { orgId },
+      where: { org_id },
     });
     if (!org) {
       return next(
@@ -229,7 +255,7 @@ exports.createOrganisation = async (req, res, next) => {
 
     await sequelize.sync({});
     const organisation = await Organisation.create({
-      org_owner_id: user.userId,
+      org_owner_id: user.user_id,
       name,
       description,
     });
@@ -250,10 +276,10 @@ exports.addUserToOrganisation = async (req, res, next) => {
   try {
     const { userId } = req.body;
     const user = req.currentUser;
-    const { orgId } = req.params;
+    const { org_id } = req.params;
 
     const organisation = await Organisation.findOne({
-      where: { orgId, org_owner_id: user.userId },
+      where: { org_id, org_owner_id: user.user_id },
     });
 
     const user_to_add = await User.findByPk(userId);

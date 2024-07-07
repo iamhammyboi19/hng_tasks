@@ -3,8 +3,15 @@
   "version": "1.0.0",
   "description": "BACKEND Stage 2 Task: User Authentication & Organisation",
   "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
   "scripts": {
-    "start": "nodemon ./api/index.js"
+    "start": "nodemon ./api/index.js",
+    "test": "jest --watchAll --setupFiles ./.env --verbose false"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "author": "iamhammyboi19",
   "license": "ISC",
@@ -19,5 +26,11 @@
     "pg-hstore": "^2.3.4",
     "phone": "^3.1.48",
     "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0"
   }
 }
