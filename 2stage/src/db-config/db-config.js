@@ -6,8 +6,6 @@ const sequelize = new Sequelize(
   // { dialect: "postgres" }
 );
 
-console.log(process.env.DATABASE_URL);
-
 sequelize
   .sync()
   .then(() => {

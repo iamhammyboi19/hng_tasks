@@ -83,7 +83,6 @@ exports.signupUser = async (req, res, next) => {
       },
     });
   } catch (err) {
-    console.log("err", err);
     return res
       .status(400)
       .json({ message: "Registration unsuccessful", status: "Bad request" });

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "nodemon ./api/index.js",
-    "test": "jest --watchAll --setupFiles ./.env --verbose false"
+    "test": "jest --watchAll --setupFiles dotenv/config --verbose false"
   },
   "jest": {
     "testEnvironment": "node"

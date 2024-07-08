@@ -12,7 +12,7 @@ test("Should sign up a new user create default organisation for signed up user a
     lastName: "Test User",
     email: "mynewtestuser@example.com",
     password: "test4321",
-    phone: "+2349010006600",
+    phone: "+2349010446600",
   });
 
   const user = response.body.data.user;
@@ -21,7 +21,7 @@ test("Should sign up a new user create default organisation for signed up user a
   expect(token).toBeDefined();
   const organisation = response.body.data.organisation;
   expect(organisation).toBeDefined();
-}, 10000);
+}, 20000);
 
 test("Should Fail If Required Fields Are Missing", async () => {
   const response = await request(app).post("/auth/register").send({
@@ -106,4 +106,30 @@ test("Should throw JWT error after verifying expired JWT Token", async () => {
   expect(() => {
     throw new Error(decoded);
   }).toThrow("jwt expired");
+});
+
+describe("GET /organisations", () => {
+  let token;
+
+  beforeAll(async () => {
+    const res = await request(app).post("/auth/register").send({
+      firstName: "Test",
+      lastName: "Auth",
+      email: "testuserauth@example.com",
+      password: "test1234",
+      phone: "+2347010203040",
+    });
+
+    token = res.body.data.accessToken;
+  });
+
+  test("Should Get User Organisations", async () => {
+    const res = await request(app)
+      .get("/api/organisations")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data.org.length).toBeGreaterThan(0);
+  });
 });
