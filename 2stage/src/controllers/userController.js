@@ -49,16 +49,17 @@ exports.signupUser = async (req, res, next) => {
     });
 
     // if user is created -> create organisation under the user
+    let organisation;
     if (user) {
       try {
         const name = `${user?.firstName}'s Organisation`;
-        await sequelize.sync({});
-        const organisation = await Organisation.create({
+        // await sequelize.sync({});
+        organisation = await Organisation.create({
           org_owner_id: user.user_id,
           name,
           description,
         });
-        await sequelize.sync({});
+        // await sequelize.sync({});
         await user.addOrganisation(organisation);
       } catch (err) {
         return next(err);
@@ -72,6 +73,7 @@ exports.signupUser = async (req, res, next) => {
       message: "Registration successful",
       data: {
         accessToken,
+        organisation,
         user: {
           firstName: user.firstName,
           lastName: user.lastName,

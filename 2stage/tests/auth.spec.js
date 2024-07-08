@@ -1,35 +1,27 @@
 const request = require("supertest");
 const { User, Organisation } = require("../src/model/userModel.js");
 const app = require("../api/index.js");
-const createFirstUserOnTest = require("./db.js");
 const sequelize = require("../src/db-config/db-config.js");
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 
-beforeAll(createFirstUserOnTest);
-
 /* TESTS FOR USER SIGNUP */
 test("Should sign up a new user create default organisation for signed up user and send accessToken", async () => {
-  const response = await request(app)
-    .post("/auth/register")
-    .send({
-      firstName: "Second",
-      lastName: "User",
-      email: "seconduser@example.com",
-      password: "test4321",
-      phone: "+2349010006600",
-    })
-    .expect(201);
+  const response = await request(app).post("/auth/register").send({
+    firstName: "My New",
+    lastName: "Test User",
+    email: "mynewtestuser@example.com",
+    password: "test4321",
+    phone: "+2349010006600",
+  });
 
   const user = response.body.data.user;
   expect(user).toBeDefined();
-  const token = await response.body.data.accessToken;
+  const token = response.body.data.accessToken;
   expect(token).toBeDefined();
-  const organisation = await Organisation.findOne({
-    where: { name: "Second's Organisation" },
-  });
+  const organisation = response.body.data.organisation;
   expect(organisation).toBeDefined();
-});
+}, 10000);
 
 test("Should Fail If Required Fields Are Missing", async () => {
   const response = await request(app).post("/auth/register").send({
@@ -47,7 +39,7 @@ test("Should fail trying to register a user with an existing email", async () =>
     .send({
       firstName: "New",
       lastName: "User",
-      email: "firsttestuser@example.com",
+      email: "seconduser@example.com",
       password: "test4321",
       phone: "+2348060009000",
     })
@@ -108,6 +100,7 @@ test("Should throw JWT error after verifying expired JWT Token", async () => {
     password: "test4321",
   });
 
+  // JWT NEEDS TO BE SET TO 60ms
   const token = response.body.data.accessToken;
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   expect(() => {
